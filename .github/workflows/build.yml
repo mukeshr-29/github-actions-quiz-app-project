@@ -47,7 +47,6 @@ jobs:
         with:
           args: >
             -Dsonar.projectBaseDir=./quiz-app
-            # Additional arguments if needed
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
@@ -113,10 +112,6 @@ jobs:
         env:
           CI: true 
 
-      - name: Build
-        run: npm run build
-        working-directory: ./backend
-
       - name: trivy FS
         run: |
           trivy fs --format table -o trivy-fs-be-report.html .
@@ -126,7 +121,6 @@ jobs:
         with:
           args: >
             -Dsonar.projectBaseDir=./quiz-app
-            # Additional arguments if needed
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
