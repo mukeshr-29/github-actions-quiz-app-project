@@ -10,6 +10,11 @@ jobs:
     defaults:
       run:
         working-directory: ./quiz-app
+    
+    strategy:
+      matrix:
+        node-version: [20.x]
+        architecture: [x64]
 
     steps:
       - name: Check-out git repository  
@@ -17,7 +22,7 @@ jobs:
 
       - name: USE NODEJS ${{ matrix.node-version }} - ${{ matrix.architecture }}
         uses: actions/setup-node@v4
-        
+
       - name: Install project dependencies 
         working-directory: ./quiz-app
         run: |
