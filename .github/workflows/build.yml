@@ -1,0 +1,149 @@
+name: CICD Pipeline
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  frontend-test:
+    runs-on: self-hosted
+    defaults:
+      run:
+        working-directory: ./quiz-app
+
+    steps:
+      - name: Check-out git repository  
+        uses: actions/checkout@v4
+      - name: Install project dependencies 
+        working-directory: ./quiz-app
+        run: |
+          npm i
+          npm run lint
+          npm install --save-dev --save-exact prettier
+          npm run prettier
+          npm test
+        env:
+          CI: true
+
+      - name: Build
+        run: npm run build
+        working-directory: ./quiz-app
+
+      - name: trivy FS
+        run: |
+          trivy fs --format table -o trivy-fs-report.html .
+
+      - name: SonarQube scan
+        uses: sonarsource/sonarqube-scan-action@master
+        with:
+          args: >
+            -Dsonar.projectBaseDir=./quiz-app
+            # Additional arguments if needed
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      - name: Install jq
+        run: sudo apt update && sudo apt install -y jq
+
+      - name: SonarQube Quality Gate check
+        id: sonarqube-quality-gate-check
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        # Force to fail step after specific time.
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build and tag backend Docker image
+        working-directory: ./quiz-app
+        run: |
+          docker build . -t ${{ secrets.DOCKER_USERNAME }}/frontend-js
+
+      - name: trivy img scan
+        run: |
+          trivy image --format table -o trivy-img-report.html ${{ secrets.DOCKER_USERNAME }}/backend-api 
+
+      - name: Push Docker Image
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin 
+          docker push ${{ secrets.DOCKER_USERNAME }}/frontend-js 
+
+
+  backend-test:
+    runs-on: self-hosted
+    defaults:
+      run:
+        working-directory: ./backend
+    steps:
+      - name: Check-out git repository  
+        uses: actions/checkout@v4
+
+      - name: Install project dependencies 
+        working-directory: ./backend
+        run: |
+          npm i
+          npm run lint
+          npm install --save-dev --save-exact prettier
+          npm run prettier
+          npm test
+        env:
+          CI: true 
+
+      - name: Build
+        run: npm run build
+        working-directory: ./backend
+
+      - name: trivy FS
+        run: |
+          trivy fs --format table -o trivy-fs-be-report.html .
+
+      - name: SonarQube scan
+        uses: sonarsource/sonarqube-scan-action@master
+        with:
+          args: >
+            -Dsonar.projectBaseDir=./quiz-app
+            # Additional arguments if needed
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      - name: Install jq
+        run: sudo apt update && sudo apt install -y jq
+
+      - name: SonarQube Quality Gate check
+        id: sonarqube-quality-gate-check
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        # Force to fail step after specific time.
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build and tag backend Docker image
+        working-directory: ./backend
+        run: |
+          docker build . -t ${{ secrets.DOCKER_USERNAME }}/backend-api
+
+      - name: trivy img scan
+        run: |
+          trivy image --format table -o trivy-img-report-be.html ${{ secrets.DOCKER_USERNAME }}/backend-api 
+
+      - name: Push Docker Image
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin 
+          docker push ${{ secrets.DOCKER_USERNAME }}/backend-api    
+      
+      
