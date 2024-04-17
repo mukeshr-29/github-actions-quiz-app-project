@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: ${{ secrets.DOCKER_USERNAME }}/backend-api
+        image: mukeshr29/backend-api
         ports:
         - containerPort: 3000
         env:
