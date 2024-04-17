@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: ${{ secrets.DOCKER_USERNAME }}/frontend-js
+        image: mukeshr29/frontend-js
         ports:
         - containerPort: 8080
 ---
