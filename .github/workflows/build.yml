@@ -166,6 +166,7 @@ jobs:
       - run: |
           kubectl apply -f database.yaml -f secret.yaml
           kubectl apply -f backend.yaml
+          kubectl apply -f frontend.yaml
 
 
 
