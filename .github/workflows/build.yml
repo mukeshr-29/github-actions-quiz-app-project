@@ -83,7 +83,7 @@ jobs:
 
   backend-test:
     runs-on: self-hosted
-    # needs: frontend-test
+    needs: frontend-test
     defaults:
       run:
         working-directory: ./backend
@@ -165,6 +165,7 @@ jobs:
       - run: |
           kubectl apply -f database.yaml -f secret.yaml
           kubectl apply -f backend.yaml
+          
 
 
    
