@@ -47,6 +47,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_PROJECT_BASEDIR: ./quizapp
 
       - name: Install jq
         run: sudo apt update && sudo apt install -y jq
@@ -165,7 +166,7 @@ jobs:
       - run: |
           kubectl apply -f database.yaml -f secret.yaml
           kubectl apply -f backend.yaml
-          
+
 
 
    
