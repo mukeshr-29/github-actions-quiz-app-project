@@ -23,6 +23,9 @@ spec:
       containers:
       - name: frontend
         image: mukeshr29/frontend-js
+        env:
+        - name: VITE_REACT_APP_API_URL
+          value: a61028b30368d4e8486eaef7e543ad18-587739146.us-east-1.elb.amazonaws.com:3000/api/questions
         ports:
         - containerPort: 8080
 ---
