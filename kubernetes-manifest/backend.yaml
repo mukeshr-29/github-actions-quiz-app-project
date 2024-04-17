@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: ogochukwuozotta/backend-api:latest
+        image: ${{ secrets.DOCKER_USERNAME }}/backend-api
         ports:
         - containerPort: 3000
         env:
@@ -43,5 +43,5 @@ spec:
   ports:
   - port: 3000
     protocol: TCP
-  type: ClusterIP
+  type: LoadBalancer
   
